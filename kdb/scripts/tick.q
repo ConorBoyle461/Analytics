@@ -1,26 +1,43 @@
 / q tick.q sym . -p 5001 </dev/null >foo 2>&1 &
 /q tick.q SRC [DST] [-p 5010] [-o h]
 parms:1#.q;
-parms:(.Q.def[`schema`logFile`tpLog`port`action!("sym";"tpProcessLog.txt";"tpLog/tp_";"5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
-if[all parms[`action] like "start";system"l ",src:$[0h~type parms[`schema];raze parms[`schema];"tick/sym"],".q"];
+parms:(.Q.def[`schema`tpLog`port`action!("schema";"tpLog";"5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
+if[all parms[`action] like "start";system"l ",src:$[0h~type parms[`schema];raze parms[`schema];"../schema.q"]];
 
 if[all parms[`action] like "start";system raze ("p "),parms[`port]] ;
 
-.Q.l `:CryptoAnalytics/kdb/scripts/u.q ;   /This is hacky but I dont have time to spend on making this nice
-\l `:./CryptoAnalytics/kdb/scripts/logger.q;				/Likewise as above
-
 \d .u
-ld:{if[not type key L::`$((parms[`tpLog]),string x);.[L;();:;()]];i::j::-11!(-2;L);if[0<=type i;-2 (string L)," is a corrupt log. Truncate to length ",(string last i)," and restart";exit 1];.log.getHandle get `.`parms`logFile;hopen L };
+getLogHandle:{[parms;date]
+      .[L;();:;()];           /Opening the tp log up from the file name as a list?
+      i::j::-11!(-2;L);      /
+      if[0<=type i;-2 (string L)," is a corrupt log. Truncate to length ",(string last i)," and restart";exit 1];
+     / .log.getHandle[parms[`logFile]];
+      hopen L };
 
-tick:{
+tick:{[parms]
 	init[];
 	@[;`sym;`g#] each t ;
 	d::.z.D ;
-	if[l::count y;L::`$":",y,"/",x,10#".";l::ld d] ; 
-	.log.write "This is a test";
+	if[not `l in key .u;                                   /Checking if there is a log handle already open
+	   L:: hsym `$ raze parms[`tpLog],"tp_",string d;    /TP log filenname
+           l::getLogHandle[parms;] d] ; 					/Assign a hande for tp log file 
 	}
 
 endofday:{end d;d+:1;if[l;hclose l;l::0(`.u.ld;d)]};
+
+init:{w::t!(count t::tables`.)#()}
+
+del:{w[x]_:w[x;;0]?y};.z.pc:{del[;x]each t};
+
+sel:{$[`~y;x;select from x where sym in y]}
+
+pub:{[t;x]{[t;x;w]if[count x:sel[x]w 1;(neg first w)(`upd;t;x)]}[t;x]each w t}
+
+add:{$[(count w x)>i:w[x;;0]?.z.w;.[`.u.w;(x;i;1);union;y];w[x],:enlist(.z.w;y)];(x;$[99=type v:value x;sel[v]y;@[0#v;`sym;`g#]])}
+
+sub:{if[x~`;:sub[;y]each t];if[not x in t;'x];del[x].z.w;add[x;y]}
+
+end:{(neg union/[w[;;0]])@\:(`.u.end;x)}
 
 ts:{ if[d<x;if[d<x-1;system"t 0";'"more than one day?"];endofday[]]};
 
@@ -37,7 +54,7 @@ if[not system"t";system"t 60000";
  f:key flip value t;tbl:flip f!x;.u.pub[t;tbl];if[l;l enlist (`upd;t;tbl);i+:1];}];
 
 \d .
-.u.tick[src;.z.x 1];
+.u.tick[parms];
 
 \
  globals used
