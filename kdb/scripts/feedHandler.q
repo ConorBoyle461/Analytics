@@ -12,17 +12,17 @@ getbid:{[s] prices[s]-getmovement[s]} /generate bid price
 getask:{[s] prices[s]+getmovement[s]} /generate ask price
 /timer function
 if[first parms[`action] like "start";
-  .z.ts:{sendDummyRecord[]}
+  .z.ts:{sendDummyRecord[h]}
   ]
 
 /trigger timer every 100ms
 
 
-sendDummyRecord:{
+sendDummyRecord:{[h]
   s:n?syms;
   $[0<flag mod 10;
-    h(".u.upd";`quote;(n#.z.N;s;getbid'[s];getask'[s];n?1000;n?1000));
-    h(".u.upd";`trade;(n#.z.N;s;getprice'[s];n?1000))];
+    h(".u.upd";`quote;flip `time`sym`bid`ask`bsize`asize!"nsffii"$(n#.z.N;s;getbid'[s];getask'[s];n?1000;n?1000));
+    h(".u.upd";`trade;flip `time`sym`price`size!"nsfi"$(n#.z.N;s;getprice'[s];n?1000))];
   flag+:1;}
 
 \t 100

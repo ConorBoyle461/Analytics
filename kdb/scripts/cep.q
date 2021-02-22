@@ -2,12 +2,13 @@
 /2008.09.09 .k ->.q
 
 if[not "w"=first string .z.o;system "sleep 1"];
+parms:1#.q ;
+parms:(.Q.def[`tpPort`action!("localhost:5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
 
-upd:{[t;x] t insert x} /Initial definition of upd so tpLogs can be read in and brought back up to sync with tp
+upd:{[t;x] t upsert x} /Initial definition of upd so tpLogs can be read in and brought back up to sync with tp
 
-parms::.Q.opt .z.x
 
-handle::(hopen `$":",(parms[`tpPort])[0])
+handle::(hopen `$":",(parms[`tpPort]))
 
 / get the ticker plant and history ports, defaults are 5010,5012
 /.u.x:.z.x,(count .z.x)_(":5010";":5012");
@@ -22,8 +23,8 @@ handle::(hopen `$":",(parms[`tpPort])[0])
 / connect to ticker plant for (schema;(logcount;log))
 .u.rep .({handle(`.u.sub;x;`)} each `$parms[`tables];handle(`.u.i);handle(`.u.L ));
 
-upd:{[t;x] t insert x;                                 /Redefining upd to aggregate publishing func after tp logs read in  
+upd:{[t;x] t upsert x;                                /Redefining upd to aggregate publishing func after tp logs read in   
   if[`trade = t;  
-    agg_data:0!select time:`time$.z.N, max_price:`float$max price, min_price:`float$min price, volume:`long$sum size  by sym from trade;
-    if[0<count agg_data;handle(`.u.upd;`aggregation;enlist (agg_data[`sym];agg_data[`time];agg_data[`max_price];agg_data[`min_price];agg_data[`volume]))]]};
+  agg_data:`time`sym`max_price`min_price`volume xcols 0!select time:"n"$.z.N, max_price:`float$max price, min_price:`float$min price, volume:`int$sum size by sym from trade;
+    if[0<count agg_data;handle(`.u.upd;`aggregation;agg_data)]]};
 

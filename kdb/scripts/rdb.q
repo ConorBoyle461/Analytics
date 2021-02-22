@@ -2,11 +2,11 @@
 /2008.09.09 .k ->.q
 
 if[not "w"=first string .z.o;system "sleep 1"];
+parms:1#.q ; 
+parms:(.Q.def[`tpPort`action!("localhost:5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
+upd:{[t;x]  t upsert x };
 
-upd:{[t;x]  t insert x };
-parms::.Q.opt .z.x
-
-handle::(hopen `$":",(parms[`tpPort])[0])
+handle::(hopen `$":",(parms[`tpPort]))
 
 / get the ticker plant and history ports, defaults are 5010,5012
 /.u.x:.z.x,(count .z.x)_(":5010";":5012");

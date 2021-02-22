@@ -48,10 +48,12 @@ ts:{ if[d<x;if[d<x-1;system"t 0";'"more than one day?"];endofday[]]};
 / t insert x;if[l;l enlist (`upd;t;x);j+:1];}];
 
 if[not system"t";system"t 60000";
- .z.ts:{ts .z.D; .log.write "Heartbeat.." };
+ .z.ts:{ts .z.D};
  upd:{[t;x]ts"d"$a:.z.P;
- if[not -16=type first first x;a:"n"$a;x:$[0>type first x;a,x;(enlist(count first x)#a),x]];
- f:key flip value t;tbl:flip f!x;.u.pub[t;tbl];if[l;l enlist (`upd;t;tbl);i+:1];}];
+   datatypes:exec t from meta t;
+   if[not (datatypes~(exec t from meta x));'datatype_mismatch];
+   .u.pub[t;x];
+   if[l;l enlist (`upd;t;x);i+:1];}];
 
 \d .
 .u.tick[parms];
