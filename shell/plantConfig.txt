@@ -1,0 +1,4 @@
+ticker_plant,START,5000,CryptoAnalytics/kdb/scripts/tick.q,~/tpLogs/
+realtime_database,START,5010,CryptoAnalytics/kdb/scripts/rdb.q,~/rdbLogs/
+feed_handler,START,5020,CryptoAnalytics/kdb/scripts/feedHandler.q,~/feedLogs/
+hdb,,5030,hdb.q,~/hdbLogs/
