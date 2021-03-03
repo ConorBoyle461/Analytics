@@ -1,0 +1,1 @@
+ticker_plant,START,5000,scripts/q/tick.q,/home/conor/tpLogs/

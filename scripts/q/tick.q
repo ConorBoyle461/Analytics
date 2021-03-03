@@ -1,10 +1,12 @@
 / q tick.q sym . -p 5001 </dev/null >foo 2>&1 &
 /q tick.q SRC [DST] [-p 5010] [-o h]
 parms:1#.q;
-parms:(.Q.def[`schema`tpLog`port`action!("schema";"tpLog";"5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
-if[all parms[`action] like "start";system"l ",src:$[0h~type parms[`schema];raze parms[`schema];"../schema.q"]];
+parms:(.Q.def[`schema`tpLog`port`action!("config/advancedKdb/schema.q";"tpLog";"5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
+if[all parms[`action] like "START";
+  system"l ",parms[`schema]];
 
-if[all parms[`action] like "start";system raze ("p "),parms[`port]] ;
+if[all parms[`action] like "START";
+  system raze ("p "),parms[`port]];
 
 \d .u
 getLogHandle:{[parms;date]
