@@ -1,1 +1,2 @@
-ticker_plant,START,5000,scripts/q/tick.q,/home/conor/tpLogs/
+ticker_plant,START,5000,scripts/q/tick.q,/home/conor/tpLogs/,
+realtime_db,START,5051,scripts/q/rdb.q,,
