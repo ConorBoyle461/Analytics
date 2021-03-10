@@ -1,5 +1,5 @@
 parms:1#.q;
-parms:(.Q.def[`logFile`port`action`user!("feedhandlerProcessLog.txt";"5000";"start";string .z.u);.Q.opt .z.x]),.Q.opt[.z.x];
+parms:(.Q.def[`logFile`port`action`user!("feedhandlerProcessLog.txt";"5000";"START";string .z.u);.Q.opt .z.x]),.Q.opt[.z.x];
 h:neg hopen (hsym `$(raze "localhost:",parms[`port])) ; /connect to tickerplant 
 syms:`MSFT.O`IBM.N`GS.N`BA.N`VOD.L`TSLA.A  /stocks
 prices:syms!45.15 191.10 178.50 128.04 341.30 600.20 /starting prices 
@@ -11,7 +11,7 @@ getprice:{[s] prices[s]+:rand[1 -1]*getmovement[s]; prices[s]}
 getbid:{[s] prices[s]-getmovement[s]} /generate bid price
 getask:{[s] prices[s]+getmovement[s]} /generate ask price
 /timer function
-if[first parms[`action] like "start";
+if[first parms[`action] like "START";
   .z.ts:{sendDummyRecord[h]}
   ]
 

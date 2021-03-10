@@ -6,6 +6,9 @@ parms:1#.q ;
 parms:(.Q.def[`tpPort`action!("localhost:5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
 upd:{[t;x]  t upsert x };
 
+if[all parms[`action] like "START";
+  system raze ("p "),parms[`port]];
+
 handle::(hopen `$raze (":localhost:"),(parms[`tpPort]))   /Assuming rdb is running on local host
 
 / get the ticker plant and history ports, defaults are 5010,5012
