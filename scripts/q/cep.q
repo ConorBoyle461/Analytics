@@ -8,7 +8,7 @@ parms:(.Q.def[`tpPort`action!("localhost:5000";"start");.Q.opt .z.x]),.Q.opt[.z.
 upd:{[t;x] t upsert x} /Initial definition of upd so tpLogs can be read in and brought back up to sync with tp
 
 
-handle::(hopen `$":",(parms[`tpPort]))
+handle::(hopen `$raze (":localhost:"),(parms[`tpPort]))    /Again assuming all of this will be on one host
 
 / get the ticker plant and history ports, defaults are 5010,5012
 /.u.x:.z.x,(count .z.x)_(":5010";":5012");
