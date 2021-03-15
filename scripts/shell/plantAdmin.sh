@@ -8,9 +8,8 @@ while getopts ":a:c:" opt; do
     ;;
   esac
 done
-WORKDIR=$HOME/Analytics/
-cd $WORKDIR
-CONFIG=$WORKDIR/config/advancedKdb/plantConfig.cfg
+cd $HOME  
+CONFIG=Analytics/config/plantConfig.cfg
 source $CONFIG
 
 declare -A function_map
@@ -33,6 +32,7 @@ declare -A port_map
 port_map[tp]=$tp_port
 port_map[rdb1]=$rdb1_port
 port_map[rdb2]=$rdb2_port
+port_map[cep]=$cep_port
 
 declare -A rdb_sub
 rdb_sub[rdb1]=$rdb1_tables
@@ -69,33 +69,34 @@ function action_component () {                       #This takes a component: "t
   }
 
 function start_tickerplant () {
-    echo "Starting TP with command: $q_path $WORKDIR/$tp_script -action $tp_action -port $tp_port -tpLog $tp_log_dir &"
-    $q_path $WORKDIR/$tp_script -action $1 -port $tp_port -tpLog $tp_log_dir &
+    echo "Starting TP with command: $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &"
+    $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &
     }
 
 function start_rdb () {
-  echo "Starting RDB with command: $q_path $WORKDIR/$rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
-  $q_path $WORKDIR/$rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &
+  echo "Starting RDB with command: $q_path $rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
+  $q_path $rdb_script -action $1 -schema $tp_schema -port $2 -tpPort $tp_port -tables $3 &
   }
 
 function start_cep () {
-  echo "Starting CEP with command: $q_path $WORKDIR/$cep_script -action $1 -schema $rdb_schema -tpPort $tp_port -tables $3 &"
-  $q_path $WORKDIR/$cep_script -action $1 -schema $rdb_schema -tpPort $tp_port -tables $3 &
+  echo "Starting CEP with command: $q_path $cep_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
+  $q_path $cep_script -action $1 -schema $tp_schema -p $cep_port -tpPort $tp_port -tables $3 &
   }
 
 function start_loader () {
-  echo "Starting loader with command: $q_path $WORKDIR/$loader_script -action $1 -port $tp_port &"
-  $q_path $WORKDIR/$loader_script -action $1 -port $tp_port &
+  echo "Starting loader with command: $q_path $loader_script -action $1 -tpPort $tp_port &"
+  sleep 2 #Simple solution to loader trying to connect to tp before it's ready
+  $q_path $loader_script -action $1 -port $tp_port &
   }
 
 if [[  -z $COMPONENT  ]];then
   echo "No component supplied. Applying action to all components "
   echo "Executing $ACTION for all components"
   action_component tp $ACTION 
-  action_component rdb1 $ACTION  ${port_map[rdb1]} "${rdb_sub[rdb1]}"
-  action_component rdb2 $ACTION  ${port_map[rdb2]} "${rdb_sub[rdb2]}"
-  action_component loader $ACTION  
-  action_component cep $ACTION  ${port_map[cep]} "${rdb_sub[rdb2]}"
+  action_component rdb1 $ACTION  ${port_map['rdb1']} "${rdb_sub['rdb1']}"
+  action_component rdb2 $ACTION  ${port_map['rdb2']} "${rdb_sub['rdb2']}"
+  action_component cep $ACTION  ${port_map['cep']} "${rdb_sub['cep']}"
+  action_component loader $ACTION
   echo "Completed"
 
 else

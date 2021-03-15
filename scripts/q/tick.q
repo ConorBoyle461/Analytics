@@ -1,19 +1,16 @@
-/ q tick.q sym . -p 5001 </dev/null >foo 2>&1 &
-/q tick.q SRC [DST] [-p 5010] [-o h]
 parms:1#.q;
-parms:(.Q.def[`schema`tpLog`port`action!("config/advancedKdb/schema.q";"tpLog";"5000";"start");.Q.opt .z.x]),.Q.opt[.z.x];
-if[all parms[`action] like "START";
-  system"l ",parms[`schema]];
+parms:(.Q.def[`schema`tpLog`port`action`log!((getenv`BASEDIR),"/config/schema.q";"tpLog";"5000";"start";"logs/tplog.txt");.Q.opt .z.x]),.Q.opt[.z.x];
 
-if[all parms[`action] like "START";
-  system raze ("p "),parms[`port]];
+if[all parms[`action] like "START"; system raze ("l "),parms[`schema]];
+if[all parms[`action] like "START"; system raze ("p "),parms[`port]];
+if[all parms[`action] like "START"; system raze ("l "),((getenv`BASEDIR),"scripts/q/logger.q")];
 
 \d .u
 getLogHandle:{[parms;date]
       .[L;();:;()];           /Opening the tp log up from the file name as a list?
       i::j::-11!(-2;L);      /
       if[0<=type i;-2 (string L)," is a corrupt log. Truncate to length ",(string last i)," and restart";exit 1];
-     / .log.getHandle[parms[`logFile]];
+      .log.getHandle[parms[`log]];
       hopen L };
 
 tick:{[parms]

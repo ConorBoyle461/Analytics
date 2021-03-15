@@ -1,6 +1,6 @@
 parms:1#.q;
-parms:(.Q.def[`logFile`port`action`user!("feedhandlerProcessLog.txt";"5000";"START";string .z.u);.Q.opt .z.x]),.Q.opt[.z.x];
-h:neg hopen (hsym `$(raze "localhost:",parms[`port])) ; /connect to tickerplant 
+parms:(.Q.def[`logFile`tpPort`action`user!("feedhandlerProcessLog.txt";"5000";"START";string .z.u);.Q.opt .z.x]),.Q.opt[.z.x];
+h:neg hopen `$raze (":localhost:"),(parms[`tpPort]) ; /connect to tickerplant 
 syms:`MSFT.O`IBM.N`GS.N`BA.N`VOD.L`TSLA.A  /stocks
 prices:syms!45.15 191.10 178.50 128.04 341.30 600.20 /starting prices 
 n:2 /number of rows per update
