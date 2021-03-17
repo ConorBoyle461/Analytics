@@ -1,5 +1,5 @@
 parms:1#.q;
-parms:(.Q.def[`schema`tpLog`port`action`log!((getenv`BASEDIR),"/config/schema.q";"tpLog";"5000";"start";"logs/tplog.txt");.Q.opt .z.x]),.Q.opt[.z.x];
+parms:(.Q.def[`schema`tpLog`port`action`log!((getenv`BASEDIR),"/config/schema.q";"tpLog";"5000";"start";(getenv `LOGDIR),"processlogs/tp.log");.Q.opt .z.x]),.Q.opt[.z.x];
 
 if[all parms[`action] like "START"; system raze ("l "),parms[`schema]];
 if[all parms[`action] like "START"; system raze ("p "),parms[`port]];
@@ -7,22 +7,24 @@ if[all parms[`action] like "START"; system raze ("l "),((getenv`BASEDIR),"script
 
 \d .u
 getLogHandle:{[parms;date]
+      .log.write "Opening handle to ticker plant log file" ;
       .[L;();:;()];           /Opening the tp log up from the file name as a list?
       i::j::-11!(-2;L);      /
       if[0<=type i;-2 (string L)," is a corrupt log. Truncate to length ",(string last i)," and restart";exit 1];
-      .log.getHandle[parms[`log]];
       hopen L };
 
 tick:{[parms]
 	init[];
 	@[;`sym;`g#] each t ;
 	d::.z.D ;
+        .log.getHandle[parms[`log]] ;
 	if[not `l in key .u;                                   /Checking if there is a log handle already open
 	   L:: hsym `$ raze parms[`tpLog],"tp_",string d;    /TP log filenname
            l::getLogHandle[parms;] d] ; 					/Assign a hande for tp log file 
-	}
+	.log.write "Initialization complete!" ;}
 
-endofday:{end d;d+:1;if[l;hclose l;l::0(`.u.ld;d)]};
+endofday:{.log.write "Running end of day..";
+          end d;d+:1;if[l;hclose l;l::0(`.u.ld;d)]};
 
 init:{w::t!(count t::tables`.)#()}
 
@@ -30,11 +32,15 @@ del:{w[x]_:w[x;;0]?y};.z.pc:{del[;x]each t};
 
 sel:{$[`~y;x;select from x where sym in y]}
 
-pub:{[t;x]{[t;x;w]if[count x:sel[x]w 1;(neg first w)(`upd;t;x)]}[t;x]each w t}
+pub:{[t;x].log.write "Publishing update for table: ",string t;
+     {[t;x;w]if[count x:sel[x]w 1;(neg first w)(`upd;t;x)]}[t;x]each w t }
 
 add:{$[(count w x)>i:w[x;;0]?.z.w;.[`.u.w;(x;i;1);union;y];w[x],:enlist(.z.w;y)];(x;$[99=type v:value x;sel[v]y;@[0#v;`sym;`g#]])}
 
-sub:{if[x~`;:sub[;y]each t];if[not x in t;'x];del[x].z.w;add[x;y]}
+sub:{.log.write "Subscribe request received"; 
+     if[x~`;:sub[;y]each t];
+     if[not x in t;'x];
+     del[x].z.w;add[x;y]}
 
 end:{(neg union/[w[;;0]])@\:(`.u.end;x)}
 
@@ -47,12 +53,13 @@ ts:{ if[d<x;if[d<x-1;system"t 0";'"more than one day?"];endofday[]]};
 / t insert x;if[l;l enlist (`upd;t;x);j+:1];}];
 
 if[not system"t";system"t 60000";
- .z.ts:{ts .z.D};
- upd:{[t;x]ts"d"$a:.z.P;
-   datatypes:exec t from meta t;
-   if[not (datatypes~(exec t from meta x));'datatype_mismatch];
-   .u.pub[t;x];
-   if[l;l enlist (`upd;t;x);i+:1];}];
+ .z.ts:{.log.write "Heartbeat" ; ts .z.D};
+ upd:{[t;x]ts"d"$a:.z.P ;
+   .log.write "Update received for ",string t ;
+   datatypes:exec t from meta t ;
+   if[not (datatypes~(exec t from meta x));'datatype_mismatch] ;
+   .u.pub[t;x] ;
+   if[l;l enlist (`upd;t;x);i+:1];}] ;
 
 \d .
 .u.tick[parms];

@@ -11,6 +11,8 @@ done
 cd $HOME  
 CONFIG=Analytics/config/plantConfig.cfg
 source $CONFIG
+export BASEDIR
+export LOGDIR
 
 declare -A function_map
 
@@ -52,7 +54,7 @@ function action_component () {                       #This takes a component: "t
   then
     if [[ ! -z ${component_pids[$1]}  ]];then
       echo "Killing $1 process on ${component_pids[$1]}"
-      kill ${component_pids[$1]}
+      kill -9 ${component_pids[$1]}
     else
       echo "The $1 process is already dead"
     fi
@@ -71,22 +73,25 @@ function action_component () {                       #This takes a component: "t
 function start_tickerplant () {
     echo "Starting TP with command: $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &"
     $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &
+    sleep 5
     }
 
 function start_rdb () {
   echo "Starting RDB with command: $q_path $rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
   $q_path $rdb_script -action $1 -schema $tp_schema -port $2 -tpPort $tp_port -tables $3 &
+  sleep 5 
   }
 
 function start_cep () {
   echo "Starting CEP with command: $q_path $cep_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
   $q_path $cep_script -action $1 -schema $tp_schema -p $cep_port -tpPort $tp_port -tables $3 &
+  sleep 5 
   }
 
 function start_loader () {
   echo "Starting loader with command: $q_path $loader_script -action $1 -tpPort $tp_port &"
-  sleep 2 #Simple solution to loader trying to connect to tp before it's ready
   $q_path $loader_script -action $1 -port $tp_port &
+  sleep 5
   }
 
 if [[  -z $COMPONENT  ]];then
