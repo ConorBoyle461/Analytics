@@ -73,25 +73,25 @@ function action_component () {                       #This takes a component: "t
 function start_tickerplant () {
     echo "Starting TP with command: $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &"
     $q_path $tp_script -action $1 -port $tp_port -schema $tp_schema -tpLog $tp_log_dir &
-    sleep 5
+    sleep 3
     }
 
 function start_rdb () {
   echo "Starting RDB with command: $q_path $rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
   $q_path $rdb_script -action $1 -schema $tp_schema -port $2 -tpPort $tp_port -tables $3 &
-  sleep 5 
+  sleep 3 
   }
 
 function start_cep () {
   echo "Starting CEP with command: $q_path $cep_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
   $q_path $cep_script -action $1 -schema $tp_schema -p $cep_port -tpPort $tp_port -tables $3 &
-  sleep 5 
+  sleep 3 
   }
 
 function start_loader () {
   echo "Starting loader with command: $q_path $loader_script -action $1 -tpPort $tp_port &"
   $q_path $loader_script -action $1 -port $tp_port &
-  sleep 5
+  sleep 3
   }
 
 if [[  -z $COMPONENT  ]];then

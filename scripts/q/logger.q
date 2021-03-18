@@ -10,7 +10,7 @@ write:{(neg .log.logHandle) .log.info[], x }
 
 getHandle:{.log.logHandle:hopen .log.logFile:`$raze ":",x}
 
-.z.po:{.log.write "Connection opened on handle: ", string x}
+.z.po:{.log.write "Connection opened on handle: ", string x}  
 
 .z.pc:{.log.write "Connection closed on handle:" ,string x}
 \d .
