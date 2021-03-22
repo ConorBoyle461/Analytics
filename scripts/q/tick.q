@@ -1,5 +1,5 @@
 parms:1#.q;
-parms:(.Q.def[`schema`tpLog`port`action`log!((getenv`BASEDIR),"/config/schema.q";"tpLog";"5000";"start";(getenv `LOGDIR),"processlogs/tp.log");.Q.opt .z.x]),.Q.opt[.z.x];
+parms:(.Q.def[`schema`tpLog`port`action`log!((getenv`BASEDIR),"/config/schema.q";"tpLog";"5000";"START";(getenv `LOGDIR),"processlogs/tp.log");.Q.opt .z.x]),.Q.opt[.z.x];
 
 if[all parms[`action] like "START"; system raze ("l "),parms[`schema]];
 if[all parms[`action] like "START"; system raze ("p "),parms[`port]];
@@ -19,6 +19,7 @@ tick:{[parms]
 	d::.z.D ;
         .log.getHandle[parms[`log]] ;
 	if[not `l in key .u;                                   /Checking if there is a log handle already open
+           logdir:: hsym `$ raze parms[`tpLog] ;
 	   L:: hsym `$ raze parms[`tpLog],"tp_",string d;    /TP log filenname
            l::getLogHandle[parms;] d] ; 					/Assign a hande for tp log file 
 	.log.write "Initialization complete!" ;}
