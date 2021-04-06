@@ -57,6 +57,7 @@ if[not system"t";system"t 60000";
  .z.ts:{.log.write "Heartbeat" ; ts .z.D};
  upd:{[t;x]ts"d"$a:.z.P ;
    .log.write "Update received for ",string t ;
+   if[0=type x; x:raze x] ;                    /Had to do this because of q interpreting Java objects as lists  
    datatypes:exec t from meta t ;
    if[not (datatypes~(exec t from meta x));'datatype_mismatch] ;
    .u.pub[t;x] ;
