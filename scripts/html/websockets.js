@@ -2,6 +2,8 @@
 var ws, syms = document.getElementById("selectSyms"),
     quotes = document.getElementById("tblQuote"),
     trades = document.getElementById("tblTrade");
+    input =  document.getElementById("txtInput")
+
 
 function connect() {
     if ("WebSocket" in window) {
@@ -9,7 +11,7 @@ function connect() {
         ws.onopen = function(e) {
             /* on successful connection, we want to create an
             initial subscription to load all the data into the page*/
-            ws.send("loadPage[]");
+            ws.send("loadPage[`all]");
         };
 
         ws.onmessage = function(e) {
@@ -28,6 +30,23 @@ function connect() {
     } else alert("WebSockets not supported on your browser.");
 }
 
+function sendText() {
+        /* 
+            store the input command so that we can access it later 
+            to print in with the response 
+        */
+        cmd = "q)" + input.value + "<br />";
+        /* send the input command across the WebSocket connection */
+        ws.send('filterSyms[`' + input.value + ']');
+        /* 
+            reset the input test box to empty, and 
+            focus the cursor back on it ready for the next input 
+        */
+        input.value="";
+        input.focus();
+
+}
+
 function filterSyms() {
     /* get the values of checkboxes that are ticked and
     convert into an array of strings */
@@ -41,6 +60,7 @@ function filterSyms() {
     /*call the filterSyms function over the WebSocket*/
     ws.send('filterSyms[`'+ t +']');
 }
+
 
 function setSyms(data) {
     /* parse an array of strings into checkboxes */
