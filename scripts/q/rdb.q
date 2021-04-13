@@ -2,7 +2,7 @@
 /2008.09.09 .k ->.q
 
 parms:1#.q ; 
-parms:(.Q.def[`tpPort`action`log!("localhost:5000";"start";(getenv `LOGDIR),"processlogs/rdb1.log");.Q.opt .z.x]),.Q.opt[.z.x] ;
+parms:(.Q.def[`tpPort`action`log!("localhost:5000";"START";(getenv `LOGDIR),"processlogs/rdb1.log");.Q.opt .z.x]),.Q.opt[.z.x] ;
 upd:{[t;x]  .log.write "Update recieved for table: ",string t ; 
             t upsert x } ;
 system raze ("l "),((getenv`BASEDIR),"scripts/q/logger.q") ;

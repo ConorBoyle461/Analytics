@@ -40,13 +40,17 @@ declare -A rdb_sub
 rdb_sub[rdb1]=$rdb1_tables
 rdb_sub[rdb2]=$rdb2_tables
 rdb_sub[cep]=$rdb2_tables
- 
+
+declare -A rdb_log
+rdb_log[rdb1]=$rdb1_log
+rdb_log[rdb2]=$rdb2_log
+
 function action_component () {                       #This takes a component: "tp", "rdb" or "loader" and applies the input action to it 
   if [[  $2 == "START"  ]];
   then
     if [[ -z ${component_pids[$1]}  ]];then
        echo $4
-       ${function_map[$1]}  $2 $3 "$4"
+       ${function_map[$1]}  $2 $3 "$4" "$5"
     else 
       echo "The $1 process is already running on pid ${component_pids[$1]}"
     fi
@@ -77,8 +81,8 @@ function start_tickerplant () {
     }
 
 function start_rdb () {
-  echo "Starting RDB with command: $q_path $rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 &"
-  $q_path $rdb_script -action $1 -schema $tp_schema -port $2 -tpPort $tp_port -tables $3 &
+  echo "Starting RDB with command: $q_path $rdb_script -action $1 -schema $rdb_schema -port $2 -tpPort $tp_port -tables $3 -log $4 &"
+  $q_path $rdb_script -action $1 -schema $tp_schema -port $2 -tpPort $tp_port -tables $3 -log $4 &
   sleep 3 
   }
 
@@ -98,15 +102,15 @@ if [[  -z $COMPONENT  ]];then
   echo "No component supplied. Applying action to all components "
   echo "Executing $ACTION for all components"
   action_component tp $ACTION 
-  action_component rdb1 $ACTION  ${port_map['rdb1']} "${rdb_sub['rdb1']}"
-  action_component rdb2 $ACTION  ${port_map['rdb2']} "${rdb_sub['rdb2']}"
+  action_component rdb1 $ACTION  ${port_map['rdb1']} "${rdb_sub['rdb1']}" "${rdb_log['rdb1']}"
+  action_component rdb2 $ACTION  ${port_map['rdb2']} "${rdb_sub['rdb2']}" "${rdb_log['rdb2']}"
   action_component cep $ACTION  ${port_map['cep']} "${rdb_sub['cep']}"
   action_component loader $ACTION
   echo "Completed"
 
 else
   echo "Component $COMPONENT supplied. Applying $ACTION to $COMPONENT"
-  action_component $COMPONENT $ACTION  ${port_map[$COMPONENT]} "${rdb_sub[$COMPONENT]}"
+  action_component $COMPONENT $ACTION  ${port_map[$COMPONENT]} "${rdb_sub[$COMPONENT]}" "${rdb_log[$COMPONENT]}"
 fi
 
 
